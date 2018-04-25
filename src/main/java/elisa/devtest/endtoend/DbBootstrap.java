@@ -12,9 +12,9 @@ import java.util.Scanner;
 public class DbBootstrap {
     public void bootstratp() {
         executeWith("base.sql");
-        if(System.getProperty("insertExampleData") != null) {
+        //if(System.getProperty("insertExampleData") != null) {
             executeWith("data.sql");
-        }
+        //}
         executeWithJson("product_dump", "PHONES", "products.json");
         executeWithJson("pricing_dump", "PHONES", "pricing.json");
     }

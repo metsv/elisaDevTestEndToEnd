@@ -9,6 +9,8 @@ CREATE TABLE customer (
   CONSTRAINT customer_pk PRIMARY KEY (customer_id)
 );
 
+CREATE SEQUENCE order_seq;
+
 CREATE TABLE orders (
   order_id number(10) not null,
   customer_id number(10) not null,
@@ -18,12 +20,15 @@ CREATE TABLE orders (
     REFERENCES customer(customer_id)
 );
 
+CREATE SEQUENCE order_line_seq;
+
 CREATE TABLE order_line (
   order_line_id number(10) not null,
   order_id number(10) not null,
-  product_id number(10) not null,
+  product_id varchar2(50) not null,
   product_name varchar2 (50) not null,
   quantity number(10) not null,
+  price number(100,2) not null,
   CONSTRAINT order_line_pk PRIMARY KEY (order_line_id),
   CONSTRAINT fk_order
     FOREIGN KEY(order_id)

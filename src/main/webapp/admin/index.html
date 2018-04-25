@@ -51,11 +51,12 @@
         <div class="orderRow" id="order-id-{{orderId}}">
             <div class="col-md-10"><h5>OrderId: {{orderId}}</h5> <h5>CustomerId: {{customer.customerId}}</h5> <h5>Name</h5> {{customer.companyName}} <h5>Address:</h5> {{customer.street}} {{customer.postalCode}} {{customer.city}} {{customer.country}}</div>
             {{#orderItemList orderLines}}
-                <div class="col-md-10">
-                    <div id="order-line-id-{{orderLineId}}-pid" class="col-md-4">ProductId: {{productId}}</div>
-                    <div id="order-line-id-{{orderLineId}}-pname" class="col-md-4">ProductName: {{productName}}</div>
-                    <div id="order-line-id-{{orderLineId}}-amount" class="col-md-4">Amount: {{quantity}}</div>
-                </div>
+            <div class="col-md-10">
+                <div id="order-line-id-{{orderLineId}}-pid" class="col-md-4">ProductId: {{productId}}</div>
+                <div id="order-line-id-{{orderLineId}}-pname" class="col-md-4">ProductName: {{productName}}</div>
+                <div id="order-line-id-{{orderLineId}}-amount" class="col-md-2">Amount: {{quantity}}</div>
+                <div id="order-line-id-{{orderLineId}}-price" class="col-md-2">Price: {{price}}</div>
+            </div>
             {{/orderItemList}}
         </div>
         <div class="col-md-10" style="background-color: #ffffff"></div>
@@ -65,6 +66,7 @@
 <div class="container" id="orderList">
     <h1>Admin tool</h1>
     <h2>Order listing</h2>
+    <div col-md-2><a class="btn btn-primary" id="add-order" href="/" role="button">Add order</a></div>
 
 </div>
 

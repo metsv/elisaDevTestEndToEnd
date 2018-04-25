@@ -18,34 +18,36 @@
 
 <script type="text/javascript">
 
-        function loadAdminFrame(done) {
-            $('#adminframe').one('load', function(){ done(); }).attr('src', '/admin/index.html');
-        }
+    function loadAdminFrame(done) {
+        $('#adminframe').one('load', function () {
+            done();
+        }).attr('src', '/admin/index.html');
+    }
 
-        function atleastTwoOrdersAreLoaded() {
-            return $('#adminframe').contents().find("div[class=orderRow]").length >= 2
-        }
+    function atleastTwoOrdersAreLoaded() {
+        return $('#adminframe').contents().find("div[class=orderRow]").length >= 2
+    }
 
-        function secondOrderHasLumia1520() {
-            return $('#adminframe').contents().find("div[id=order-line-id-4-pname]").text() === "ProductName: Nokia Lumia 1520"
-        }
+    function secondOrderHasLumia1520() {
+        return $('#adminframe').contents().find("div[id=order-line-id-4-pname]").text() === "ProductName: Nokia Lumia 1520"
+    }
 
-        function thirdOrderHasLumia2500() {
-            return $('#adminframe').contents().find("div[id=order-line-id-4-pname]").text() === "ProductName: Nokia Lumia 2500"
-        }
+    function thirdOrderHasLumia2500() {
+        return $('#adminframe').contents().find("div[id=order-line-id-4-pname]").text() === "ProductName: Nokia Lumia 2500"
+    }
 
-        describe('Admin page', function () {
-            it('Lists atleast two orders', function(done){
-                zhain()
-                    .do(loadAdminFrame)
-                    .waitUntil(atleastTwoOrdersAreLoaded)
-                    .waitUntil(secondOrderHasLumia1520)
-                    .run(done);
-            });
+    describe('Admin page', function () {
+        it('Lists atleast two orders', function (done) {
+            zhain()
+                .do(loadAdminFrame)
+                .waitUntil(atleastTwoOrdersAreLoaded)
+                .waitUntil(secondOrderHasLumia1520)
+                .run(done);
         });
+    });
 
-        mocha.checkLeaks();
-        mocha.run();
+    mocha.checkLeaks();
+    mocha.run();
 
 </script>
 </body>

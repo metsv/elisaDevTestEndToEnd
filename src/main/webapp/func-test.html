@@ -19,8 +19,60 @@
 <script type="text/javascript">
 
 
-        mocha.checkLeaks();
-        mocha.run();
+    function productFormHasSelections() {
+        chai.expect($("#adminframe").contents().find("#productSelect option").text()).to.equal("Nokia Lumia 1020 - BlueSamsung Galaxy 4Nokia Lumia 1020 - White");
+        return true;
+    }
+
+    function customerFormHasSelections() {
+        chai.expect($("#adminframe").contents().find("#customerSelect option").text()).to.equal("Putka OyPutka Oy 2");
+        return true;
+    }
+
+    function newOrderIsAddedToOrder() {
+        var firstOrderLine = $("#adminframe").contents().find(".order-line").eq(0);
+        chai.expect(firstOrderLine.find(".product-id").text()).to.equal("f3DFS234#212dfS");
+        chai.expect(firstOrderLine.find(".product-name").text()).to.equal("Nokia Lumia 1020 - Blue");
+        chai.expect(firstOrderLine.find(".quantity").text()).to.equal("1");
+        chai.expect(firstOrderLine.find(".price").text()).to.equal("50");
+        chai.expect(firstOrderLine.find(".linePrice").text()).to.equal("50");
+        return true;
+    }
+
+    beforeEach(function (done) {
+        $('#adminframe').one('load', function () {
+            done();
+        }).attr('src', '/index.html');
+        sessionStorage.clear();
+    });
+
+    describe('New Order handling page', function () {
+        it('Product selection filling test', function (done) {
+            zhain()
+                .waitUntil(productFormHasSelections)
+                .run(done)
+        });
+
+        it('Customer selection filling test', function (done) {
+            zhain()
+                .waitUntil(customerFormHasSelections)
+                .run(done);
+        });
+
+        it("Add new product to order", function (done) {
+            zhain()
+                .do(function (done) {
+                    $("#adminframe").contents().find("#product-form button").click()
+                    done()
+                })
+                .waitUntil(newOrderIsAddedToOrder)
+                .run(done);
+        });
+    });
+
+
+    mocha.checkLeaks();
+    mocha.run();
 
 </script>
 </body>

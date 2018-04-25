@@ -4,14 +4,227 @@
     <meta charset="utf-8"/>
     <title>Shops</title>
     <script src="../lib/jquery.js" type="application/javascript"></script>
+    <script src="../lib/lodash.js" type="application/javascript"></script>
     <script src="../lib/bacon.js" type="application/javascript"></script>
     <script src="../lib/bacon.model.js" type="application/javascript"></script>
     <script src="../lib/bacon.jquery.js" type="application/javascript"></script>
-    <script src="//builds.handlebarsjs.com.s3.amazonaws.com/handlebars-v2.0.0.js" type="application/javascript"></script>
+    <script src="//builds.handlebarsjs.com.s3.amazonaws.com/handlebars-v2.0.0.js"
+            type="application/javascript"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/bootstrap/3.3.0/css/bootstrap.min.css">
+
+
+
+    <script type="text/javascript">
+
+        if (sessionStorage.getItem("order") === null) {
+            var initialOrder = {
+                customerId: 1,
+                totalPrice: 0,
+                orderLines: []
+            };
+            sessionStorage.setItem('order', JSON.stringify(initialOrder));
+        }
+
+        var customersResult = Bacon.$.ajax("/api/customers");
+        customersResult.onValue(selectCustomerForm);
+
+        var productsResult = Bacon.$.ajax("/api/products");
+        productsResult.onValue(selectProductForm);
+
+        var productsResult = Bacon.$.ajax("/api/prices");
+        productsResult.onValue(fillPricesSessionStorage);
+
+        $(document).ready(drawOrder);
+
+        function selectCustomerForm(customers) {
+            var customerFormTemplate = Handlebars.compile($("#select-customer-template").html());
+            $('.select-customer').append(customerFormTemplate({ customers: customers}));
+
+            $("#customerSelect").change(function () {
+                var order = JSON.parse(sessionStorage.getItem("order"));
+                order.customerId = $("#customerSelect option:selected").val();
+                sessionStorage.setItem("order",  JSON.stringify(order));
+            });
+        }
+
+        function fillPricesSessionStorage(prices) {
+            var order = sessionStorage.setItem("prices", JSON.stringify(prices));
+        }
+
+        function drawOrder() {
+            var orderBasket = JSON.parse(sessionStorage.getItem("order"));
+            var orderTemplate = Handlebars.compile($("#order-template").html());
+            $(".order").html(orderTemplate(orderBasket));
+        }
+
+        function selectProductForm(products) {
+            var self = this;
+            var selectProductTemplate = Handlebars.compile($("#select-product-template").html());
+            $(".select-product").append(selectProductTemplate( { products: products}));
+
+            $("#product-form").submit(function(event) {
+                var split = event.target.productIdPriceId.value.split("-")
+                var productId = split[0];
+                var priceId = Number(split[1]);
+                var productName = $("#productSelect option:selected").text();
+
+
+
+                var order = JSON.parse(sessionStorage.getItem("order"));
+                var productAlreadyContainedInOrder = _.find(order.orderLines, ["productId", productId]);
+                var quantity = Number(event.target.quantity.value);
+                if (productAlreadyContainedInOrder) {
+                    quantity += productAlreadyContainedInOrder.quantity;
+                    _.pull(order.orderLines, productAlreadyContainedInOrder);
+                }
+
+
+
+                var price = _.find((JSON.parse(sessionStorage.getItem("prices"))), ["id", priceId]);
+
+                var productPrice = 0;
+                if (quantity > price.recurringCount) {
+                    productPrice = Math.round(price.recurringPrice * 100) / 100;
+                } else {
+                    productPrice = Math.round(price.oneTimePrice * 100) / 100;
+                }
+
+                var orderLine = {
+                    productId: productId,
+                    productName: productName,
+                    quantity: quantity,
+                    price: productPrice,
+                    linePrice: Math.round(productPrice * quantity * 100) /100
+                };
+
+
+                order.orderLines.push(orderLine);
+                order.totalPrice = _.sumBy(order.orderLines, 'linePrice');
+                sessionStorage.setItem("order",  JSON.stringify(order));
+                self.drawOrder();
+                event.preventDefault();
+            });
+        }
+
+        $(function () {
+            $("#save-order")
+                .asEventStream("click")
+                .subscribe(function () {
+                    Bacon.$.ajax({
+                        type: "POST",
+                        url: "/api/orders",
+                        data: sessionStorage.getItem('order'),
+                        contentType: "application/json; charset=utf-8",
+                        dataType: "json",
+                        success: function (data) {
+                            sessionStorage.clear();
+                            $(location).attr('href', '/admin')
+                        },
+                        failure: function (errMsg) {
+                            alert("Validation failed: " + errMsg);
+                        }
+                    });
+                })
+        });
+
+    </script>
+    <script id="select-customer-template" type="text/x-handlebars-template">
+        <div class="form-group">
+            <label for="customerSelect">Customer</label>
+            <select class="form-control" id="customerSelect" name="customerId">
+                {{#each customers}}
+                    <option value="{{customerId}}">{{companyName}}</option>
+                {{/each}}
+            </select>
+        </div>
+        <!--<div class="col-md-10" style="background-color: #ffffff"></div>-->
+    </script>
+
+    <script id="order-template" type="text/x-handlebars-template">
+        <table id="order-table" class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>ProductId</th>
+                    <th>ProductName</th>
+                    <th>Price</th>
+                    <th>Qty</th>
+                    <th>Line Price</th>
+                </tr>
+            </thead>
+            <tbody>
+                {{#each orderLines}}
+                <tr class="order-line">
+                    <td class="product-id" scope="row">{{productId}}</td>
+                    <td class="product-name">{{productName}}</td>
+                    <td class="price">{{price}}</td>
+                    <td class="quantity">{{quantity}}</td>
+                    <td class="linePrice">{{linePrice}}</td>
+                </tr>
+                {{/each}}
+                <tr class="order-footer">
+                    <td colspan="4" style="text-align: right;"><b>Total: </b></td>
+                    <td class="linePrice">{{totalPrice}}</td>
+                </tr>
+            </tbody>
+        </table>
+        <!--<div class="col-md-10" style="background-color: #ffffff"></div>-->
+    </script>
+
+    <script id="select-product-template" type="text/x-handlebars-template">
+        <form id="product-form" data-product-submit="product-to-order-submit">
+            <div class="form-group">
+                <label>Pick a Product</label>
+                <select id="productSelect" class="form-control" name="productIdPriceId">
+                    {{#each products}}
+                        <option value="{{id}}-{{priceId}}">{{name}}</option>
+                    {{/each}}
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Quantity</label>
+                <select class="form-control" name="quantity">
+                    <option>1</option>
+                    <option>2</option>
+                    <option>3</option>
+                    <option>4</option>
+                    <option>5</option>
+                    <option>6</option>
+                    <option>7</option>
+                    <option>8</option>
+                    <option>9</option>
+                    <option>10</option>
+                    <option>11</option>
+                    <option>12</option>
+                    <option>13</option>
+                    <option>14</option>
+                    <option>15</option>
+                </select>
+            </div>
+            <button class="btn btn-default" type="submit">Add to Order</button>
+        </form>
+    </script>
+
 
 </head>
 <body>
-    Skeleton
+<div class="container">
+    <h1>Order handling</h1>
+    <div class="row">
+        <div class="select-customer col-md-5"></div>
+        <div class="select-product col-md-5">
+    </div>
+
+    <div class="row">
+        <div class="col-md-10"><br></div>
+    </div>
+
+    <div class="row">
+        <div class="order col-md-10"></div>
+    </div>
+    <div class="row">
+        <div class="col-md-9"></div>
+        <div col-md-1><a class="btn btn-primary" id="save-order" href="#" role="button">Save order</a></div>
+    </div>
+</div>
 </body>
 </html>

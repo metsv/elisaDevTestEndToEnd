@@ -1,32 +1,44 @@
 package elisa.devtest.endtoend.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class OrderLine {
-    private long orderLineId;
-    private long productId;
-    private String productName;
-    private int quantity;
+  private long orderLineId;
+  private String productId;
+  private String productName;
+  private int quantity;
+  private Double price;
 
-    public OrderLine(long orderLineId, long productId, String productName, int quantity) {
-        this.orderLineId = orderLineId;
-        this.productId = productId;
-        this.productName = productName;
-        this.quantity = quantity;
-    }
 
-    public long getOrderLineId() {
-        return orderLineId;
-    }
+  public OrderLine(long orderLineId, String productId, String productName, int quantity, Double price) {
+    this.orderLineId = orderLineId;
+    this.productId = productId;
+    this.productName = productName;
+    this.quantity = quantity;
+    this.price = price;
+  }
 
-    public long getProductId() {
-        return productId;
-    }
+  public OrderLine() {
+  }
 
-    public String getProductName() {
-        return productName;
-    }
+  public long getOrderLineId() {
+    return orderLineId;
+  }
 
-    public int getQuantity() {
-        return quantity;
-    }
+  public String getProductId() {
+    return productId;
+  }
+
+  public String getProductName() {
+    return productName;
+  }
+
+  public int getQuantity() {
+    return quantity;
+  }
+
+  public Double getPrice() {
+    return price;
+  }
 }
