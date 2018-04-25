@@ -1,5 +1,14 @@
 1) How would you rate (1-10) the difficulty level of the test (1 = really easy, 10 = impossible)?
 
+I will classify test on medium 5 level, because have not done any frontend development in last to 2 years, lot to recap.
+
 2) Was the timit limit (7,5 hours) ok or too strict?
 
+It took me more than 7,5 hours, approximately ~15 hours, most of time re-introducing front frameworks and reading about new libraries for me.
+
 3) Other feedback about the test?
+
+Some libraries are outdated, seems to be old assignment. For backend I will recommend Spring Boot base, with flyway to keep track migrations.
+Also tried same assignment with JHipster took 30 minutes, to cover functionality. Testing with Mocha seemed interesting
+, how it is used on SI servers in that way? I would prefer java selenium test instead in this kind of setup.
+
